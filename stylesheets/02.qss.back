@@ -1,0 +1,300 @@
+
+
+QMainWindow {
+background-color: rgb(220,220,220,255);
+}
+
+
+QDialog {
+background-color: rgb(220,220,220,255);
+}
+
+QFileDialog {
+background-color: rgb(220,220,220,255);
+}
+
+QMessageBox {
+background-color: rgb(220,220,220,255);
+}
+
+
+
+QFrame {
+ background-color: rgb(220,220,220,255);
+}
+
+QWidget[paintme01=true] {
+  background-color: rgb(220,220,220,255);
+}
+
+QWidget[paintme02=true] {
+  background-color: rgb(220,220,220,255);
+}
+
+QWidget[paintme03=true] {
+  background-color: rgb(220,220,220,255);
+}
+
+
+
+/* hello */
+
+QPlainTextEdit {
+background-color: rgb(255,255,255,255);
+}
+
+
+
+QGroupBox {
+color: rgb(0,0,0,255);
+background-color: rgb(220,220,220,255);
+}
+
+
+QMenuBar {
+background-color: rgb(220,220,220,255);
+}
+
+QMenu {
+background-color: rgb(220,220,220,255);
+}
+
+
+
+
+
+
+
+/**** QToolBox (enabled) ****/
+QToolBox
+{
+  background-color: transparent;
+}
+
+QToolBox::tab
+{
+  background: rgb(220,220,220,255);
+  border: 1px solid rgb(20,20,20);
+  color: rgb(20,20,20);
+  }
+
+QToolBox::tab:hover,
+QToolBox::tab:selected:hover
+{
+  background: rgb(220,220,220,255);
+}
+
+QToolBox::tab:selected
+{
+  background: rgb(220,220,220,255);
+  color: rgb(20,20,20);
+}
+
+QToolBox QScrollArea
+{
+  background-color: rgb(220,220,220,255);
+  border: 0px solid transparent;
+}
+
+
+QToolBox QScrollArea:disabled
+{
+  background-color: rgb(120,120,120);
+  border-color: transparent;
+}
+
+
+QPushButton {
+border: 2px solid #6666cc;
+border-radius: 6px;
+border-style: outset;
+color: rgb(0,0,0,255);
+background: rgb(255,255,255,255);
+padding-left: 5px;
+padding-right: 5px;
+min-height: 20px;
+}
+
+QPushButton[alarm=true] {
+border: 2px solid #6666cc;
+border-radius: 6px;
+border-style: outset;
+color: rgb(0,0,0,255);
+/* background-color: rgb(230,230,255,255); */
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #D10000, stop: 0.4 #BD0000, stop: 0.5 #B80000, stop: 1.0 #A30000);
+padding-left: 5px;
+padding-right: 5px;
+min-height: 20px;
+}
+
+
+
+QPushButton::hover {
+  background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #C1D1E1, stop: 0.4 #ADADBD, stop: 0.5 #A8A8B8, stop: 1.0 #9393A3);      
+}
+
+
+QPushButton:pressed {
+border: 2px solid #6666cc;
+border-radius: 6px;
+border-style: outset;
+color: rgb(0,0,0,255);
+background-color: rgb(220,220,220,255);
+
+min-width: 30px;
+min-height: 20px;
+}
+
+QPushButton[enabled=false] {
+color: rgb(180,180,180,255);
+background: rgb(220,220,220,255);
+border: 2px;
+}    
+
+QRadioButton[enabled=false] {
+color: rgb(160,160,160,255);
+}    
+
+
+QLineEdit[enabled=false] {
+background-color: rgb(220,220,220,255);
+color: rgb(160,160,160,255);
+border: 2px;
+}
+
+QLineEdit[enabled=true] {
+background-color: rgb(255,255,255,255);;
+color: rgb(10,10,10,255);
+border: 2px;
+}
+
+QLineEdit:focus {
+background-color: rgb(220,220,220,255);
+color: rgb(10,10,10,255);
+border: 2px;
+}
+
+QListWidget[enabled=true] {
+background: rgb(255,255,255,255);
+color: rgb(10,10,10,255);
+border: 2px;
+}
+
+
+
+
+
+/* item selectionne  dans liste deroulee */
+QComboBox:!editable:on {
+background: rgb(50,120,50,255);
+color: rgb(220,220,220,255);
+border: 2px;
+}
+
+/* bouton fleche bas */
+QComboBox[enabled=true] {
+background: rgb(220,220,220,255);
+color: rgb(10,10,10,255);
+border: 2px;
+}
+
+/* texte quand liste ferme*/
+QComboBox:!editable {
+border: 2px solid #6666cc;
+border-radius: 6px;
+border-style: outset;
+color: rgb(0,0,0,255);
+/* background-color: rgb(230,230,255,255); */
+background: rgb(220,220,220,255);
+
+padding-left: 5px;
+padding-right: 5px;
+min-width: 20px;
+min-height: 20px;
+
+}
+
+
+QComboBox:!editable:disabled {
+border: 2px solid #6666cc;
+border-radius: 6px;
+border-style: outset;
+color: rgb(160,160,160,255);
+background: rgb(220,220,220,255);
+
+min-width: 30px;
+min-height: 20px;
+}
+
+
+
+
+
+QLabel {
+color: rgb(0,0,0,255);
+background: rgb(220,220,220,255);
+padding-left: 5px;
+padding-right: 5px;
+}
+
+QLabel[enabled=true] {
+color: rgb(0,0,0,255);
+background: rgb(220,220,220,255);
+}
+
+QLabel[enabled=false] {
+color: rgb(150,150,150,255);
+background: rgb(220,220,220,255);
+}
+
+
+
+
+
+
+
+
+QScrollBar:vertical {
+     border: 2px solid grey;
+     background: lightgrey;
+     width: 25px;
+     margin: 30px 0 30px 0;
+ }
+ QScrollBar::handle:vertical {
+     background: rgb(220,220,220,255);
+     border: 2px solid grey;
+     border-style: outset;
+     min-height: 10px;
+ }
+
+/* fleche bas */
+ QScrollBar::add-line:vertical {
+     border: 2px solid grey;
+     image: url('chevron-down.png');
+     background: rgb(220,220,220,255);
+     border-style: outset;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+ }
+
+/*fleche haut */
+ QScrollBar::sub-line:vertical {
+     border: 2px solid grey;
+     image: url('chevron-up.png');
+     background: rgb(220,220,220,255);
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+
+
+QTableWidget {
+   background: rgb(255,255,255,255);   
+}
+
+
+
+QTableWidget::item {
+   rgb(255,255,255,255);   
+   padding: 5px 0px 5px 0px;        
+}
+
