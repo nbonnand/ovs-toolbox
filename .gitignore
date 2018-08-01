@@ -3,7 +3,7 @@ ovs-toolbox.pro
 ovs-toolbox.pro.user
 __pycache__
 .ropeproject/
-tmp/
+tmp/*
 *~
 hello_world
 project
