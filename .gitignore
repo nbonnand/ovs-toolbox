@@ -1,5 +1,5 @@
 __pycache__
 .ropeproject/
-#src/tmp/*
+src/tmp/*
 *~
 
