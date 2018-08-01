@@ -5914,7 +5914,7 @@ def action_interface_type_refresh():
         for portline in port_tree.get_selected():
             #get interface name ( not portname )
             portname,interfacename=port_and_interface(portline)
-            result=exec_and_display(['ovs-vsctl','--column=type,options,lldp','list','interface',interfacename],hide_output=False)
+            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False)
             process_fields('INTERFACE_TYPE',result)
             break
             
