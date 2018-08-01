@@ -1,9 +1,5 @@
-IGNORE/
-ovs-toolbox.pro
-ovs-toolbox.pro.user
 __pycache__
 .ropeproject/
-tmp/*
+#src/tmp/*
 *~
-hello_world
-project
+
