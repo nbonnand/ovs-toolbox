@@ -1,0 +1,32 @@
+FROM docker.io/fedora
+RUN dnf -y update iproute \
+	   openssh-clients \
+	   wget \
+	   curl \
+	   iputils \
+	   traceroute \
+	   iperf \
+	   wireshark \
+	   tcpdump \
+	   procps-ng \
+	   scapy \    
+	   lighttpd
+RUN dnf -y install iproute \
+	   openssh-clients \
+	   wget \
+	   curl \
+	   iputils \
+	   traceroute \
+	   iperf \
+	   wireshark \
+	   tcpdump \
+	   procps-ng \
+	   scapy \
+	   net-tools \
+	   lsof \		
+	   lighttpd \
+	   udpcast
+RUN setcap cap_net_raw,cap_net_admin+p /usr/bin/ping
+#EXPOSE 80
+#EXPOSE 5001
+CMD ["/bin/bash"]

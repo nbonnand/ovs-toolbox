@@ -1,0 +1,34 @@
+[
+    {
+        "ifext": "P0_01",
+        "ifint": "eth0",
+        "mac": "aa:00:00:00:00:01",
+        "of": "1000",
+        "type": "intf",
+        "vlan": "100"
+    },
+    {
+        "ip": "192.168.100.1/24",
+        "net_type": "ad",
+        "type": "net"
+    },
+    {
+        "gw": "192.168.100.254",
+        "net": "default",
+        "net_type": "rt",
+        "type": "net"
+    },
+    {
+        "ifext": "P1_01",
+        "ifint": "eth1",
+        "mac": "aa:00:00:00:01:01",
+        "of": "2000",
+        "type": "intf",
+        "vlan": "101"
+    },
+    {
+        "ip": "  fdf3:b660:0a04:549a::1/64",
+        "net_type": "ad",
+        "type": "net"
+    }
+]

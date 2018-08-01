@@ -81,7 +81,7 @@ print("generating tmp/ovs-toolbox-guionly.py")
 subprocess.check_output(["pyuic5","UI/ovs-toolbox.ui","-o","tmp/ovs-toolbox-guionly.py"])
 
 #start_pdb()
-with open('ovs-toolbox.py','w') as filename_whandler:
+with open('../ovs-toolbox.py','w') as filename_whandler:
     for sourcefile in ('header.py',
                        'tmp/ovs-toolbox-guionly.py',
                        'tmp/if_dialog.py',
@@ -113,7 +113,7 @@ with open('ovs-toolbox.py','w') as filename_whandler:
     filename_whandler.close()
     print("\ngenerating: ovs-toolbox.py")
 
-subprocess.check_output(['chmod','700','ovs-toolbox.py'])
+subprocess.check_output(['chmod','700','../ovs-toolbox.py'])
 
-with open("ovs-toolbox.py.sha512sum","w") as out:
-     subprocess.run(['sha512sum','ovs-toolbox.py'],stdout=out)
+with open("../ovs-toolbox.py.sha512sum","w") as out:
+     subprocess.run(['sha512sum','../ovs-toolbox.py'],stdout=out)

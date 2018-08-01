@@ -1,0 +1,6 @@
+[
+    {
+        "run_command": "/bin/bash",
+        "run_options": "--privileged --net none -it -d"
+    }
+]

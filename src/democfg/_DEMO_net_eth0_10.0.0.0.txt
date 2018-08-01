@@ -1,0 +1,21 @@
+[
+    {
+        "ifext": "P00",
+        "ifint": "eth0",
+        "mac": "aa:00:00:00:00:00",
+        "of": "1000",
+        "type": "intf",
+        "vlan": "100"
+    },
+    {
+        "ip": "10.0.0.1/24",
+        "net_type": "ad",
+        "type": "net"
+    },
+    {
+        "gw": "10.0.0.254",
+        "net": "default",
+        "net_type": "rt",
+        "type": "net"
+    }
+]
