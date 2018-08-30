@@ -10508,7 +10508,7 @@ if __name__ == "__main__":
 
     pattern_name = re.compile(r'name\s+\:\s\"?([\w_\-]+)')
     pattern_word = re.compile(r'^([\w_\-]+)$')
-    pattern_portname = pattern_word
+    pattern_portname = re.compile(r'^([\w_\-\.\@\:]+)$')
     pattern_pgname = pattern_word
     pattern_XX = re.compile(r'(\d\d)$')
     pattern_XX_ipv4 = re.compile(r'\.\d+\/')
