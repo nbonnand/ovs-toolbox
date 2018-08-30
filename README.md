@@ -40,3 +40,5 @@ iproute related things you can do with this GUI:
 
 Plotnetcfg
 - live image of network diagram generated thanks to Plotnetcfg and Graphviz
+
+For documentation, read [ovs-toolbox wiki](https://github.com/nbonnand/ovs-toolbox/wiki)
