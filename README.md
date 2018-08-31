@@ -1,10 +1,9 @@
 ![header](https://github.com/nbonnand/ovs-toolbox/blob/master/src/wiki/header.jpg)
 
 # ovs-toolbox
+ovs-toolbox.py is a graphical user interface for Open vSwitch (OvS).
 
 ![header](https://github.com/nbonnand/ovs-toolbox/blob/master/src/wiki/header2.jpg)
-
-ovs-toolbox.py is a graphical user interface for Open vSwitch (OvS).
 
 OvS bridges managed by this GUI, do not necessarily need to be local to your host. 
 (They can be located on AWS, GCP, etc.. and managed remotely by this GUI via ssh/paramiko/sudo ) 
