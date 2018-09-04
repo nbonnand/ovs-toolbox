@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 ###########################################################################
 # footer
 ###########################################################################
@@ -7,6 +9,49 @@
 
 debug=True
 
+#---------------------------------------------------------------
+#----------------------- class myvars  --------------------
+#---------------------------------------------------------------
+
+class myvars:
+    widget_value={}
+
+    #---------------------------------------------------------------
+    
+    def clear_dic():
+        myvars.widget_value={}
+
+    #---------------------------------------------------------------
+    
+    def print_dic():
+        print("myvars.widget_value={}".format(myvars.widget_value))
+        
+    #---------------------------------------------------------------
+    def widget_STO(widget,field_value):
+        if(debug):mydebug(inspect.currentframe())
+
+        myvars.widget_value[widget]=clean_value(field_value)
+        #print("STORING {} {}".format(widget.objectName(),field_value))
+        
+    #---------------------------------------------------------------
+    def widget_RCL(widget,field_value):
+        if(debug):mydebug(inspect.currentframe())
+
+        return_value=False
+
+        old_val=myvars.widget_value.get(widget,'CANT_RETR_OLD_VAL')
+        if(old_val=='CANT_RETR_OLD_VAL'):
+            if(field_value ==''):
+                return_value=True
+            else:
+                return_value=False
+        elif(old_val==field_value):
+            return_value=True
+
+        #print("RCL {} old={} new={} rtr_keep={}".format(widget.objectName(),old_val,field_value,return_value))
+
+        return  return_value
+        
 #---------------------------------------------------------------
 #----------------------- class myClickableLabel --------------------------
 #---------------------------------------------------------------
@@ -738,21 +783,27 @@ def widgets_to_ovs(section_name,table_name,record_name):
         if('readonly' in w):
             if(w['readonly']):continue
 
-        if(not w.get('never_skip',False)):
-            fmt=w.get('fmt',False)        
-            if(not (fmt=='options' or fmt=='other_config')):        
-                if(not field_known_to_exist_in_table(section_name,w_k)):
-                    print("Skipping field {} from section {}".format(w_k,section_name))
-                    continue
-            
-        if('widgets_from' in w): 
-            w_enable,w_val=widget_read(w['widgets_from'][0])
+        #if(not w.get('never_skip',False)):
+        #    fmt=w.get('fmt',False)        
+        #    if(not (fmt=='options' or fmt=='other_config')):        
+        #        if(not field_known_to_exist_in_table(section_name,w_k)):
+        #            print("Skipping field {} from section {}".format(w_k,section_name))
+        #            continue
+                
+        if('widgets_from' in w):
+            widget=w['widgets_from'][0]
         elif('widgets' in w):
-            w_enable,w_val=widget_read(w['widgets'][0])
+            widget=w['widgets'][0]
         else:
             print("Error!!, no 'widgets' key in:{} for {}".format(w,w_k))
             print("Error!!:",section_name,table_name,record_name)
+            continue
 
+        w_enable,w_val=widget_read(widget)
+        if(myvars.widget_RCL(widget,w_val)):
+            #nothing to do because widget value is same as old
+            continue
+            
         if('fmt' in w): 
             fmt=w['fmt']
         else:
@@ -774,6 +825,12 @@ def widgets_to_ovs(section_name,table_name,record_name):
     return mycommand
     
 #---------------------------------------------------------------
+def clean_value(text):
+    text=pattern_brackets.sub('',text)
+    text=pattern_surrounding_quotes.sub('',text)
+    return text
+    
+#---------------------------------------------------------------
 def fill_widget_from_field(list_type,field_name,field_value):
     if(debug):mydebug(inspect.currentframe())
 
@@ -783,6 +840,7 @@ def fill_widget_from_field(list_type,field_name,field_value):
     if(field_name in listcom2widget_mapping[list_type].keys()):
 
         field_dic=listcom2widget_mapping[list_type][field_name]
+
         
         if('widgets' in field_dic):
             widget_list=field_dic['widgets']
@@ -824,26 +882,33 @@ def fill_widget_from_field(list_type,field_name,field_value):
 
         if(action=='convert_uuid2ports'):
             field_value=convert_uuid2ports(field_name,field_value,widget_list,list_type)
-                
+
+        #ovs_tables_dict[list_type][field_name]=clean_value(field_value) # remember field value
+        #print("REMEMBER {}:{}={}".format(list_type,field_name,field_value))
+
 
         if(isinstance(widget_list[0], QtWidgets.QLineEdit)):
             widget_list[0].setText(field_value)
-
+            myvars.widget_STO(widget_list[0],field_value)
+            
         elif(isinstance(widget_list[0], QtWidgets.QCheckBox)):
             if(widget_values.index(field_value)==0):
                 widget_list[0].setChecked(True)
             else:
                 widget_list[0].setChecked(False)
+            myvars.widget_STO(widget_list[0],field_value)
 
         elif(isinstance(widget_list[0], QtWidgets.QRadioButton)):
             widget_list[widget_values.index(field_value)].setChecked(True)
-
+            myvars.widget_STO(widget_list[widget_values.index(field_value)],field_value)
+            
         elif(isinstance(widget_list[0], QtWidgets.QLabel)):
             widget_list[0].setText(field_value)
 
         elif(isinstance(widget_list[0], QtWidgets.QComboBox)):
             comboBox_Write(widget_list[0],field_value)
-
+            myvars.widget_STO(widget_list[0],field_value)
+            
         elif(isinstance(widget_list[0], Mytable)):
             table_fill(widget_list[0],col,field_name,field_value)
 
@@ -1469,7 +1534,8 @@ def process_dict_config(field_name,field_value,list_type):
 #---------------------------------------------------------------
 
 def field_known_to_exist_in_table(list_type,field_name):
-
+    if(debug):mydebug(inspect.currentframe())
+    
     #print("??? EXIST QUERY {}:{}".format(list_type,field_name))
     ovs_tables_dict=Mymgmt.get_current_profile_attr('tables')
     if(ovs_tables_dict==None):
@@ -1481,27 +1547,25 @@ def field_known_to_exist_in_table(list_type,field_name):
             return True
 
     return False
+
         
 #---------------------------------------------------------------
 
-def process_fields(list_type,text_to_process):
+def process_fields(list_type,text_to_process,**opts):
     if(debug):mydebug(inspect.currentframe())
 
-    
-    ovs_tables_dict=Mymgmt.get_current_profile_attr('tables')
-    if(ovs_tables_dict==None):
-        return
-
-    if(not ovs_tables_dict.get(list_type,None)):
-        ovs_tables_dict[list_type]={}
+    if(not ('keep_dic' in opts)):
+        myvars.clear_dic()
     
     for line in text_to_process.splitlines():
         pline=pattern_field.match(line)
         if(pline):
-            fill_widget_from_field(list_type,pline.group(1),pline.group(2))
-            ovs_tables_dict[list_type][pline.group(1)]=True # lets remember that this field exists in this table
-            #print("REMEMBER {}:{}".format(list_type,pline.group(1)))
-            
+            field_name=pline.group(1)
+            field_value=pline.group(2)
+            fill_widget_from_field(list_type,field_name,field_value)
+
+    #myvars.print_dic()    
+
 #---------------------------------------------------------------
 
 def string_to_dict(text):
@@ -2140,9 +2204,9 @@ def action_controller_refresh():
         clear_widgets('CONTROLLER')
         result=exec_and_display(['ovs-vsctl','list','controller',switch])
         process_fields('CONTROLLER',result)
-        process_fields('CONTROLLER_STATS',result)
-        process_fields('CONTROLLER_CONN',result)
-        process_fields('CONTROLLER_PARAMS',result)
+        process_fields('CONTROLLER_STATS',result,keep_dic=true)
+        process_fields('CONTROLLER_CONN',result,keep_dic=true)
+        process_fields('CONTROLLER_PARAMS',result,keep_dic=true)
         
 #---------------------------------------------------------------
 def action_controller_show():
@@ -2181,7 +2245,7 @@ def action_open_vswitch_refresh():
     result=exec_and_display(['ovs-vsctl','list','open_vswitch'])
     clear_widgets('OPEN_VSWITCH')
     process_fields('OPEN_VSWITCH',result)
-    process_fields('OPEN_VSWITCH_STATS',result)
+    process_fields('OPEN_VSWITCH_STATS',result,keep_dic=true)
         
 #---------------------------------------------------------------
 def action_open_vswitch_show():
@@ -3781,6 +3845,8 @@ def action_port_MCAST_refresh():
     clear_widgets('MCAST_PORT')
     for portline in port_tree.get_selected():
         portname,interfacename=port_and_interface(portline)
+        if(portname=='_HOST'):
+            continue
 
         result=exec_and_display(['ovs-vsctl','--column=other_config','list','port',portname])
         process_fields('MCAST_PORT',result)
@@ -3801,7 +3867,7 @@ def action_MCAST_port_update():
 def action_MCAST_toggle():
     if(debug):mydebug(inspect.currentframe())
 
-    if(ui.radioButton_MCAST_enable.isChecked()):
+    if(ui.comboBox_MCAST_enable.currentText()=='true'):
         setEnableWidgetList([ui.frame_mcast],True)
     else:
         setEnableWidgetList([ui.frame_mcast],False)
@@ -3873,7 +3939,10 @@ def action_port_RSTP_refresh():
 
     for portline in port_tree.get_selected():
         portname=portline[0]
+        if(portname=='_HOST'):
+            continue
 
+        
         if(pattern_portname.match(portname)):
             result=exec_and_display(['ovs-vsctl','list','port',portname])
             process_fields('PORT-RSTP',result)
@@ -3896,7 +3965,7 @@ def action_RSTP_refresh():
 def action_RSTP_toggle():
     if(debug):mydebug(inspect.currentframe())
     
-    if(ui.radioButton_RSTP_enable.isChecked()):
+    if(ui.comboBox_RSTP_enable.currentText()=='true'):
         setEnableWidgetList([ui.frame_RSTP_main,ui.frame_RSTP_status],True)
     else:
         setEnableWidgetList([ui.frame_RSTP_main,ui.frame_RSTP_status],False)
@@ -3924,7 +3993,7 @@ def action_port_RSTP_validate():
     if(not ovs):return
 
     validate('ovs-vsctl','PORT-RSTP','Port')
-    action_port_RSTP_refresh
+    action_port_RSTP_refresh()
         
 #---------------------------------------------------------------
 #------------------------ STP ---------------------------------
@@ -3957,7 +4026,7 @@ def action_STP_refresh():
 def action_STP_toggle():
     if(debug):mydebug(inspect.currentframe())
 
-    if(ui.radioButton_STP_enable.isChecked()):
+    if(ui.comboBox_STP_enable.currentText()=='true'):
         setEnableWidgetList([ui.frame_STP_main,ui.frame_STP_status],True)
     else:
         setEnableWidgetList([ui.frame_STP_main,ui.frame_STP_status],False)
@@ -3988,6 +4057,8 @@ def action_port_STP_refresh():
 
     for portline in port_tree.get_selected():
         portname=portline[0]
+        if(portname=='_HOST'):
+            continue
 
         if(pattern_portname.match(portname)):
             result=exec_and_display(['ovs-vsctl','list','port',portname])
@@ -5422,6 +5493,7 @@ def action_bond_lacp_show():
 def action_bond_params_update():
     if(debug):mydebug(inspect.currentframe())
 
+    newbond=False
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
         bondname=ui.lineEdit_bond_name.text()
@@ -5432,6 +5504,7 @@ def action_bond_params_update():
             action_bond_add()
             #in case of creation, replace existing portline_list
             portline_list=[[bondname]]
+            newbond=True
 
         mycommand=validate_prepare('ovs-vsctl','BOND','Port')
             
@@ -5444,6 +5517,10 @@ def action_bond_params_update():
                 mycommand2=array_replace(mycommand,'_VARIABLE_',bondname)
                 exec_and_display(mycommand2)
 
+        action_bond_refresh()
+        if(newbond):
+            action_port_filter()
+            
 #---------------------------------------------------------------
 
 def array_replace(myarray,src,dst):
@@ -5486,7 +5563,7 @@ def action_bond_add():
                 mycommand.extend(['--','set','Interface',interfacename,"ofport_request={}".format(of)])
                 
             exec_and_display(mycommand)
-            action_port_filter()
+            #action_port_filter()
         else:
             mywarning("Please enter a name for your new bond")
 #---------------------------------------------------------------
@@ -5521,7 +5598,7 @@ def action_bond_refresh():
             
         #stop after first port
         break
-    
+
 #---------------------------------------------------------------
 
 def action_show_bond():
@@ -5570,7 +5647,10 @@ def action_vlan_refresh():
     
     for portline in port_tree.get_selected():
         portname,interfacename=port_and_interface(portline)
+        if(portname=='_HOST'):
+            continue
 
+        
         #result=exec_and_display(['ovs-vsctl','list','port',portname])
         result=exec_and_display(['ovs-vsctl','list','port',portname])
         process_fields('PORT',result)
@@ -5914,6 +5994,9 @@ def action_interface_type_refresh():
         for portline in port_tree.get_selected():
             #get interface name ( not portname )
             portname,interfacename=port_and_interface(portline)
+            if(portname=='_HOST'):
+                continue
+
             result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False)
             process_fields('INTERFACE_TYPE',result)
             break
@@ -5932,7 +6015,9 @@ def action_interface_refresh():
         for portline in port_tree.get_selected():
             #get interface name ( not portname )
             portname,interfacename=port_and_interface(portline)
-
+            if(portname=='_HOST'):
+                continue
+            
             #cannot use column because some fields do not exist in old OF version
             #result=exec_and_display(['ovs-vsctl','--column=admin_state,link_state,external_ids,mtu,mtu_request,error,link_speed,duplex,statistics','list','interface',interfacename],hide_output=False)
             result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False)
@@ -6035,10 +6120,13 @@ def action_ingress_refresh():
     clear_widgets('PORT_INGRESS')    
     for portline in port_tree.get_selected():
         portname,interfacename=port_and_interface(portline)
-        result=exec_and_display(['ovs-vsctl','--column=ingress_policing_burst,ingress_policing_rate','find','interface',"name={}".format(interfacename)],hide_output=True)
-    else:
-        process_fields('PORT_INGRESS',result)
+        if(portname=='_HOST'):
+            continue
 
+        result=exec_and_display(['ovs-vsctl','--column=ingress_policing_burst,ingress_policing_rate','find','interface',"name={}".format(interfacename)],hide_output=True)
+        process_fields('PORT_INGRESS',result)
+        #stop after first port
+        break
         
 #---------------------------------------------------------------
 
@@ -7059,7 +7147,7 @@ class myTree:
 
         if 'DragAndDrop' in optionDict['Opts']:
             self.w.setDragDropMode(QAbstractItemView.InternalMove)
-
+        
     #--------------------
     def get_selected(self):
         if(debug):mydebug(inspect.currentframe())
@@ -8657,8 +8745,8 @@ if __name__ == "__main__":
                 'widgets':[ui.lineEdit_netflow_active_timeout],
                 'fmt':'zero'},
             'add_id_to_interface' :{
-                'widgets':[ui.checkBox_netflow_add_ofid],
-                'values':['true','false'],
+                'widgets':[ui.comboBox_netflow_add_ofid],
+                'quote_chop':True,
                 'fmt':'clear'},
             'targets' :{
                 'widgets':[ui.lineEdit_netflow_targets],
@@ -8742,20 +8830,17 @@ if __name__ == "__main__":
             'other_config:enable-input-sampling' :{
                 'bracket_chop':True,
                 'quote_chop':True,
-                'widgets':[ui.checkBox_IPFIX_input_sampling],
-                'values':['true','false'],
+                'widgets':[ui.comboBox_IPFIX_input_sampling],
                 'fmt':'other_config'},
             'other_config:enable-output-sampling' :{
                 'bracket_chop':True,
                 'quote_chop':True,
-                'widgets':[ui.checkBox_IPFIX_output_sampling],
-                'values':['true','false'],
+                'widgets':[ui.comboBox_IPFIX_output_sampling],
                 'fmt':'other_config'},
             'other_config:enable-tunnel-sampling':{
                 'bracket_chop':True,
                 'quote_chop':True,
-                'widgets':[ui.checkBox_IPFIX_tunnel_sampling],
-                'values':['true','false'],
+                'widgets':[ui.comboBox_IPFIX_tunnel_sampling],
                 'fmt':'other_config'},
         },
         'STP' : {
@@ -8766,9 +8851,10 @@ if __name__ == "__main__":
                 'readonly':True,
                 'action':'process_dict_config'},
             'stp_enable' :{
-                'widgets':[ui.radioButton_STP_enable,ui.radioButton_STP_disable],
+                'widgets':[ui.comboBox_STP_enable],
                 'never_skip':True,
-                'values':['true','false']},
+                'quote_chop':True,
+            },
             'other_config:stp-forward-delay' :{
                 'widgets':[ui.lineEdit_STP_forward_delay],
                 'quote_chop':True,
@@ -8813,9 +8899,10 @@ if __name__ == "__main__":
                 'readonly':True,
                 'action':'process_dict_config'},            
             'rstp_enable' :{
-                'widgets':[ui.radioButton_RSTP_enable,ui.radioButton_RSTP_disable],
+                'widgets':[ui.comboBox_RSTP_enable],
+                'quote_chop':True,
                 'never_skip':True,
-                'values':['true','false']},
+            },
             'other_config:rstp-priority' :{
                 'widgets':[ui.lineEdit_RSTP_bridge_priority],
                 'quote_chop':True,
@@ -8880,10 +8967,10 @@ if __name__ == "__main__":
                 'readonly':True,
                 'action':'process_dict_config'},
             'mcast_snooping_enable' :{
-                'widgets':[ui.radioButton_MCAST_enable,ui.radioButton_MCAST_disable],
+                'widgets':[ui.comboBox_MCAST_enable],
                 'quote_chop':True,
                 'never_skip':True,
-                'values':['true','false']},
+                },
             'other_config:mcast-snooping-aging-time' :{
                 'widgets':[ui.lineEdit_MCAST_snooping_ageing],
                 'quote_chop':True,
@@ -8893,8 +8980,8 @@ if __name__ == "__main__":
                 'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:mcast-snooping-disable-flood-unregistered' :{
-                'widgets':[ui.radioButton_MCAST_unregistred_flood_enable,ui.radioButton_MCAST_unregistred_flood_disable],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_MCAST_unregistred_flood_enable],
+                'quote_chop':True,
                 'fmt':'other_config'},
         },
         'MCAST_PORT' : {
@@ -8902,12 +8989,12 @@ if __name__ == "__main__":
                 'readonly':True,
                 'action':'process_dict_config'},
             'other_config:mcast-snooping-flood' :{
-                'widgets':[ui.checkBox_mcast_port_flood],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_mcast_port_flood],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:mcast-snooping-flood-reports' :{
-                'widgets':[ui.checkBox_mcast_port_flood_reports],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_mcast_port_flood_reports],
+                'quote_chop':True,
                 'fmt':'other_config'},
         },
         'MANAGER' : {
@@ -9128,20 +9215,20 @@ if __name__ == "__main__":
                 'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:rstp-enable' :{
-                'widgets':[ui.radioButton_port_RSTP_enable,ui.radioButton_port_RSTP_disable],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_port_RSTP_enable],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:rstp-port-admin-edge' :{
-                'widgets':[ui.radioButton_port_RSTP_admin_edge_enable,ui.radioButton_port_RSTP_admin_edge_disable],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_port_RSTP_admin_edge_enable],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:rstp-port-auto-edge' :{
-                'widgets':[ui.radioButton_port_RSTP_auto_edge_enable,ui.radioButton_port_RSTP_auto_edge_disable],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_port_RSTP_auto_edge_enable],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:rstp-port-mcheck' :{
-                'widgets':[ui.radioButton_port_RSTP_mcheck_enable,ui.radioButton_port_RSTP_mcheck_disable],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_port_RSTP_mcheck_enable],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'rstp_status' :{
                 'readonly':True,
@@ -9232,6 +9319,7 @@ if __name__ == "__main__":
                 'quote_chop':True},
             'bond_mode':{
                 'widgets':[ui.comboBox_bond_mode],
+                'fmt':'clear',
                 'quote_chop':True},
             'bond_updelay' :{
                 'widgets':[ui.lineEdit_bond_updelay],
@@ -9242,10 +9330,12 @@ if __name__ == "__main__":
                 'quote_chop':True,
                 'fmt':'zero'},
             'bond_fake_iface' :{
-                'widgets':[ui.checkBox_bond_fake_iface],
-                'values':['true','false']},
+                'widgets':[ui.comboBox_bond_fake_iface],
+                'quote_chop':True,
+            },
             'lacp':{
                 'widgets':[ui.comboBox_lacp],
+                'fmt':'clear',
                 'quote_chop':True},
             'other_config:bond-detect-mode':{
                 'widgets':[ui.comboBox_bond_detect_mode],
@@ -9263,8 +9353,8 @@ if __name__ == "__main__":
                 'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:lacp-fallback-ab' :{
-                'widgets':[ui.checkBox_lacp_fallback_ab],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_lacp_fallback_ab],
+                'quote_chop':True,
                 'fmt':'other_config'},
             'other_config:lacp-system-id' :{
                 'widgets':[ui.lineEdit_lacp_system_id],
@@ -9457,16 +9547,16 @@ if __name__ == "__main__":
                 'bracket_chop':True,
                 'fmt':'options'},
             'options:df_default':{
-                'widgets':[ui.checkBox_interface_df],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_interface_df],
+                'quote_chop':True,
                 'fmt':'options'},
             'options:csum':{
-                'widgets':[ui.checkBox_interface_csum],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_interface_csum],
+                'quote_chop':True,
                 'fmt':'options'},
             'lldp:enable':{
-                'widgets':[ui.checkBox_interface_lldp],
-                'values':['"true"','"false"'],
+                'widgets':[ui.comboBox_interface_lldp],
+                'quote_chop':True,
                 'fmt':'lldp'},
         },
         "PORT" : {
@@ -9493,6 +9583,7 @@ if __name__ == "__main__":
             'vlan_mode':{
                 'widgets':[ui.comboBox_vlan_mode],
                 'quote_chop':True,
+                'bracket_chop':True,
                 'fmt':'clear'                
                 },
         },
@@ -9585,7 +9676,7 @@ if __name__ == "__main__":
         'netflow' : [
             [ui.lineEdit_netflow_targets,''],
             [ui.lineEdit_netflow_active_timeout,''],
-            [ui.checkBox_netflow_add_ofid,False],
+            [ui.comboBox_netflow_add_ofid,0],
             [ui.label_netflow_uuid,''],
             ],
         'sflow' : [
@@ -9603,13 +9694,14 @@ if __name__ == "__main__":
             [ui.lineEdit_IPFIX_cache_active_timeout,''],
             [ui.lineEdit_IPFIX_max_flow_cache_size,''],
             [ui.lineEdit_IPFIX_virtual_obs_domain_id,''],
-            [ui.checkBox_IPFIX_tunnel_sampling,True],
-            [ui.checkBox_IPFIX_input_sampling,True],
-            [ui.checkBox_IPFIX_output_sampling,True],
+            [ui.comboBox_IPFIX_tunnel_sampling,0],
+            [ui.comboBox_IPFIX_input_sampling,0],
+            [ui.comboBox_IPFIX_output_sampling,0],
             [ui.label_IPFIX_uuid,''],
             [ui.lineEdit_IPFIX_sampling,''],
         ],
         'STP' : [
+            [ui.comboBox_STP_enable,0],
             [ui.lineEdit_STP_bridge_priority,''],
             [ui.lineEdit_STP_bridge_system_id,''],
             [ui.lineEdit_STP_hello_time,''],
@@ -9622,6 +9714,7 @@ if __name__ == "__main__":
             [ui.label_STP_root_path_cost,''],
             ],
         'RSTP' : [
+            [ui.comboBox_RSTP_enable,0],
             [ui.lineEdit_RSTP_bridge_priority,''],
             [ui.lineEdit_RSTP_bridge_address,''],
             [ui.lineEdit_RSTP_bridge_ageing_time,''],
@@ -9639,12 +9732,12 @@ if __name__ == "__main__":
         'MCAST' : [
             [ui.lineEdit_MCAST_snooping_ageing,''],
             [ui.lineEdit_MCAST_table_size,''],
-            [ui.radioButton_MCAST_unregistred_flood_enable,False],
-            [ui.radioButton_MCAST_unregistred_flood_disable,True],
+            [ui.comboBox_MCAST_enable,0],
+            [ui.comboBox_MCAST_unregistred_flood_enable,0],
         ],
         'MCAST_PORT' : [
-            [ui.checkBox_mcast_port_flood,False],
-            [ui.checkBox_mcast_port_flood_reports,False],
+            [ui.comboBox_mcast_port_flood,0],
+            [ui.comboBox_mcast_port_flood_reports,0],
         ],
         'CONTROLLER' : [
             [ui.lineEdit_controller_target,''],
@@ -9707,15 +9800,15 @@ if __name__ == "__main__":
             [ui.lineEdit_RSTP_port_priority,''],
             [ui.lineEdit_RSTP_port_path_cost,''],
             [ui.lineEdit_RSTP_port_num,''],
-            [ui.radioButton_port_RSTP_enable,True],
-            [ui.radioButton_port_RSTP_admin_edge_enable,True],
-            [ui.radioButton_port_RSTP_auto_edge_enable,True],
-            [ui.radioButton_port_RSTP_mcheck_enable,True],
+            [ui.comboBox_port_RSTP_enable,0],
+            [ui.comboBox_port_RSTP_admin_edge_enable,0],
+            [ui.comboBox_port_RSTP_auto_edge_enable,0],
+            [ui.comboBox_port_RSTP_mcheck_enable,0],
         ],
         'BOND' : [
             [ui.lineEdit_bond_name,''],
-            [ui.checkBox_bond_fake_iface,False],
-            [ui.checkBox_lacp_fallback_ab,False],
+            [ui.comboBox_bond_fake_iface,0],
+            [ui.comboBox_lacp_fallback_ab,0],
             [ui.comboBox_bond_detect_mode,0],
             [ui.comboBox_bond_mode,0],
             [ui.comboBox_lacp,0],
@@ -9763,9 +9856,9 @@ if __name__ == "__main__":
             [ui.lineEdit_interface_ttl,''],
             [ui.comboBox_interface_exts,0],
             [ui.lineEdit_interface_tos,''],
-            [ui.checkBox_interface_df,False],
-            [ui.checkBox_interface_csum,False],
-            [ui.checkBox_interface_lldp,False],
+            [ui.comboBox_interface_df,0],
+            [ui.comboBox_interface_csum,0],
+            [ui.comboBox_interface_lldp,0],
         ],
         'PORT' : [
             [ui.comboBox_vlan_mode,0],
@@ -9830,9 +9923,9 @@ if __name__ == "__main__":
             'ALL':{
                 'e00':ui.lineEdit_interface_peer,
                 'l00':ui.label_interface_peer,
-                'c01':ui.checkBox_interface_csum,
-                'c02':ui.checkBox_interface_lldp,
-                'c03':ui.checkBox_interface_df,
+                'c01':ui.comboBox_interface_csum,
+                'c02':ui.comboBox_interface_lldp,
+                'c03':ui.comboBox_interface_df,
                 'e04':ui.lineEdit_interface_remote_ip,
                 'l04':ui.label_interface_remote_ip,
                 'e05':ui.lineEdit_interface_local_ip,
@@ -10075,12 +10168,8 @@ if __name__ == "__main__":
 
     radiobutton_mapping={
         "radioButton_mirror_output_port" : [ui,lambda:[setEnableWidgetList([ui.lineEdit_mirror_output_vlan],False,testcheckbox=ui.radioButton_mirror_output_port),setEnableWidgetList([ui.lineEdit_mirror_output_port,ui.pushButton_mirror_select_outputport],True,testcheckbox=ui.radioButton_mirror_output_port)]],
-        "radioButton_MCAST_enable" : [ui,action_MCAST_toggle],
-        "radioButton_MCAST_disable" : [ui,action_MCAST_toggle],
-        "radioButton_STP_enable" : [ui,action_STP_toggle],
-        "radioButton_STP_disable" : [ui,action_STP_toggle],
-        "radioButton_RSTP_enable" : [ui,action_RSTP_toggle],
-        "radioButton_RSTP_disable" : [ui,action_RSTP_toggle],
+        #"radioButton_MCAST_enable" : [ui,action_MCAST_toggle],
+        #"radioButton_MCAST_disable" : [ui,action_MCAST_toggle],
         "radioButton_stats_0" : [stats_ui,action_interface_statistics_refresh],
         "radioButton_stats_G" : [stats_ui,action_interface_statistics_refresh],
         "radioButton_stats_K" : [stats_ui,action_interface_statistics_refresh],
@@ -10136,11 +10225,7 @@ if __name__ == "__main__":
         "pushButton_MCAST_table_show" :  [ui,action_MAST_table_show],
         "pushButton_MCAST_table_flush" :  [ui,action_MCAST_table_flush],
         "pushButton_RSTP_list" : [ui,lambda:bridge_list('name,other_config,rstp_enable,rstp_status,status')],
-        "pushButton_RSTP_port_admin_edge_setdef" : [ui,lambda:set_default_other_config('PORT-RSTP','rstp-port-admin-edge')],
-        "pushButton_RSTP_port_admin_mcheck_setdef" : [ui,lambda:set_default_other_config('PORT-RSTP','rstp-port-mcheck')],
-        "pushButton_RSTP_port_auto_edge_setdef" : [ui,lambda:set_default_other_config('PORT-RSTP','rstp-port-auto-edge')],
         "pushButton_RSTP_port_refresh" : [ui,action_port_RSTP_refresh],
-        "pushButton_RSTP_port_rstp_enable_setdef" : [ui,lambda:set_default_other_config('PORT-RSTP','rstp-enable')],
         "pushButton_RSTP_port_validate" : [ui,action_port_RSTP_validate],
         "pushButton_RSTP_refresh" : [ui,action_RSTP_refresh],
         "pushButton_RSTP_validate" :  [ui,action_RSTP_validate],
@@ -10158,6 +10243,7 @@ if __name__ == "__main__":
         "pushButton_bond_slave_disable" : [ui,action_bond_slave_disable],
         "pushButton_bond_slave_enable" : [ui,action_bond_slave_enable],
         "pushButton_bond_update"  : [ui,action_bond_params_update],
+        "pushButton_bond_refresh"  : [ui,action_bond_refresh],
         "pushButton_bridge_list" : [ui,lambda:bridge_list('name,other_config,mcast_snooping_enable,status')],
         "pushButton_bridge_list_bridge" : [ui,action_bridge_list_bridge],
         "pushButton_bridge_listall" : [ui,lambda:bridge_list('')],
@@ -10410,6 +10496,9 @@ if __name__ == "__main__":
     }
 
     combobox_mapping={
+        "comboBox_STP_enable" : [ui,action_STP_toggle],
+        "comboBox_RSTP_enable" : [ui,action_RSTP_toggle],
+        "comboBox_MCAST_enable" : [ui,action_MCAST_toggle],
         "comboBox_type" : [ui,action_interface_type_enable_fields],
         "comboBox_dockernet" : [dockernet_ui,action_dockernet_enable_fields],
         "comboBox_mgmt_comm" : [mgmt_ui,action_mgmt_access_enable_fields],
