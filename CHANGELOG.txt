@@ -1,1 +1,4 @@
+1.0.6  ovs-toolbox now only update fields that have been changed.
+       Don't refresh vlan,if,etc.. when _HOST is selected
+
 1.0.1 initial release
