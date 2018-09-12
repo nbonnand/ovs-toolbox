@@ -17,16 +17,17 @@ class myvars:
     widget_value={}
 
     #---------------------------------------------------------------
-    
+    @staticmethod
     def clear_dic():
         myvars.widget_value={}
 
     #---------------------------------------------------------------
-    
+    @staticmethod
     def print_dic():
         print("myvars.widget_value={}".format(myvars.widget_value))
         
     #---------------------------------------------------------------
+    @staticmethod
     def widget_STO(widget,field_value):
         if(debug):mydebug(inspect.currentframe())
 
@@ -34,6 +35,7 @@ class myvars:
         #print("STORING {} {}".format(widget.objectName(),field_value))
         
     #---------------------------------------------------------------
+    @staticmethod
     def widget_RCL(widget,field_value):
         if(debug):mydebug(inspect.currentframe())
 
@@ -2204,9 +2206,9 @@ def action_controller_refresh():
         clear_widgets('CONTROLLER')
         result=exec_and_display(['ovs-vsctl','list','controller',switch])
         process_fields('CONTROLLER',result)
-        process_fields('CONTROLLER_STATS',result,keep_dic=true)
-        process_fields('CONTROLLER_CONN',result,keep_dic=true)
-        process_fields('CONTROLLER_PARAMS',result,keep_dic=true)
+        process_fields('CONTROLLER_STATS',result,keep_dic=True)
+        process_fields('CONTROLLER_CONN',result,keep_dic=True)
+        process_fields('CONTROLLER_PARAMS',result,keep_dic=True)
         
 #---------------------------------------------------------------
 def action_controller_show():
@@ -2245,7 +2247,7 @@ def action_open_vswitch_refresh():
     result=exec_and_display(['ovs-vsctl','list','open_vswitch'])
     clear_widgets('OPEN_VSWITCH')
     process_fields('OPEN_VSWITCH',result)
-    process_fields('OPEN_VSWITCH_STATS',result,keep_dic=true)
+    process_fields('OPEN_VSWITCH_STATS',result,keep_dic=True)
         
 #---------------------------------------------------------------
 def action_open_vswitch_show():
@@ -4753,11 +4755,11 @@ def action_port_del():
             if(pattern_portname.match(portname)):
                 exec_and_display(['ovs-vsctl','del-port',LineEdit_Read(ui.lineEdit_ovs_name),portname])
                 old_selected_port_row=-1
-                action_port_filter()
-                port_clear_fields()
+                #action_port_filter()
+                
                 
     action_port_filter()
-    
+    port_clear_fields()
 #---------------------------------------------------------------
 
 def if_close():
@@ -6608,6 +6610,25 @@ def action_docker_stop():
             
     action_docker_ps()
 #---------------------------------------------------------------            
+def action_docker_start():
+    if(debug):mydebug(inspect.currentframe())
+
+    liste=[]
+    for row in dockerps_table.get_selected_rows():
+        liste.append(dockerps_table.gettext(row,6))
+
+    if(liste):
+        docker_release=Mymgmt.get_current_profile_attr('docker_release')
+        if(docker_release=='<1.13'):
+            liste2=['docker','start']
+        else:
+            liste2=['docker','container','start']
+        
+        liste2.extend(liste)
+        exec_and_display(liste2)
+            
+    action_docker_ps()
+#---------------------------------------------------------------            
 def action_docker_remove():
     if(debug):mydebug(inspect.currentframe())
 
@@ -6732,6 +6753,7 @@ def action_docker_create_if(iter_mode,n,interface_uid,ovs_name,pid):
         if(net.net_type=='ad'):
             ip=net.ip
             (ip,)=iterate_array(iter_mode,n,[ip],ip_mode=True)
+            ip=ip.replace('.0','.')
             #set ip on inside veth
             nsline.append("ip addr add {} dev {}".format(ip, int_veth))
         else:
@@ -7161,6 +7183,7 @@ class myTree:
         return result
 
     #--------------------
+    @staticmethod
     def construct_chain(crawler,a):
         if(debug):mydebug(inspect.currentframe())
 
@@ -7202,6 +7225,7 @@ class myTree:
             self.model.removeRow(c)
 
     #--------------------
+    @staticmethod
     def get_top_level_parent(crawler):
         if(debug):mydebug(inspect.currentframe())
         
@@ -7224,6 +7248,7 @@ class myTree:
 
 
     #--------------------
+    @staticmethod
     def get_childs(crawler):
         if(debug):mydebug(inspect.currentframe())
 
@@ -7251,19 +7276,19 @@ class myPort:
         myPort.port_dict[name]=self
         
     #---------------------------------------------------------------
-
+    @staticmethod
     def clear():
         myPort.port_dict={}
 
     #---------------------------------------------------------------
-
+    @staticmethod
     def get(name):
         if(debug):mydebug(inspect.currentframe())
 
         return myPort.port_dict[name]
 
     #---------------------------------------------------------------
-
+    @staticmethod
     def refresh(bridge_port_list):
         if(debug):mydebug(inspect.currentframe())
 
@@ -7316,17 +7341,17 @@ class myInterface:
         myInterface.interface_dict[uuid]=name
         
     #---------------------------------------------------------------
-
+    @staticmethod
     def clear():
         myInterface.interface_dict={}
     #---------------------------------------------------------------
-
+    @staticmethod
     def getname(uuid):
         if(debug):mydebug(inspect.currentframe())
 
         return myInterface.interface_dict[uuid]
     #---------------------------------------------------------------
-
+    @staticmethod
     def refresh():
         if(debug):mydebug(inspect.currentframe())
 
@@ -7424,6 +7449,7 @@ class Mytrace:
         self.optlist=optionsdict['optlist']
 
     #--------------------
+    @staticmethod
     def remove(name):
         if(debug):mydebug(inspect.currentframe())
 
@@ -7431,6 +7457,7 @@ class Mytrace:
         del(Mytrace.tracedict[name])
 
     #--------------------
+    @staticmethod
     def removeAll():
         if(debug):mydebug(inspect.currentframe())
 
@@ -7438,12 +7465,14 @@ class Mytrace:
 
 
     #--------------------
+    @staticmethod
     def getall():
         if(debug):mydebug(inspect.currentframe())
 
         return Mytrace.tracedict.values()
 
     #--------------------
+    @staticmethod
     def get(name):
         if(debug):mydebug(inspect.currentframe())
         
@@ -7969,18 +7998,21 @@ class Mymgmt:
             self.set_current()
 
     #--------------------
+    @staticmethod
     def get_current_nickname():
         if(debug):mydebug(inspect.currentframe())
 
         return Mymgmt.mgmtcurrent
 
     #--------------------
+    @staticmethod
     def create_system_mgmt():
         if(debug):mydebug(inspect.currentframe())
 
         Mymgmt(nickname='_dot_mgmt',comm='local')
 
     #--------------------
+    @staticmethod
     def get_current_profile_attr(attr):
         if(debug):mydebug(inspect.currentframe())
 
@@ -8031,6 +8063,7 @@ class Mymgmt:
         ui.lineEdit_ovs_profile.setText(self.nickname)
         
     #--------------------
+    @staticmethod
     def get_profile_for_nickname(name):
         if(debug):mydebug(inspect.currentframe())
         
@@ -8040,12 +8073,14 @@ class Mymgmt:
             return None
 
     #--------------------
+    @staticmethod
     def getall():
         if(debug):mydebug(inspect.currentframe())
 
         return Mymgmt.mgmtdict.values()
     
     #--------------------
+    @staticmethod
     def get_current_profile():
         if(debug):mydebug(inspect.currentframe())
         
@@ -8053,6 +8088,7 @@ class Mymgmt:
 
 
     #--------------------
+    @staticmethod
     def remove(name):
         if(debug):mydebug(inspect.currentframe())
 
@@ -8060,12 +8096,14 @@ class Mymgmt:
         del(Mymgmt.mgmtdict[name])
 
     #--------------------
+    @staticmethod
     def removeAll():
         if(debug):mydebug(inspect.currentframe())
 
         Mymgmt.mgmtdict={}
 
     #--------------------
+    @staticmethod
     def remember_last_file_name(filename):
         if(debug):mydebug(inspect.currentframe())
 
@@ -8107,27 +8145,31 @@ class MyDockerNet:
 
     
     #---------------------------------------------------------------
+    @staticmethod
     def clear_net_by_uid(uid):
         MyDockerNet.dic[uid]=None
 
     #---------------------------------------------------------------
+    @staticmethod
     def clear():
         MyDockerNet.dic={}
         MyDockerNet.uid=1
         docker_net_table.delete_all_rows()
 
     #---------------------------------------------------------------
-
+    @staticmethod
     def delete(uid):
       MyDockerNet.dic[uid]=None
   
     #---------------------------------------------------------------
+    @staticmethod
     def mem_order(interface_uid):
       if(debug):mydebug(inspect.currentframe())
 
       MyDockerIf.dic[interface_uid].net=docker_net_table.get_coltext(0)
 
     #---------------------------------------------------------------
+    @staticmethod
     def populate_table(interface):
         if(debug):mydebug(inspect.currentframe())
 
@@ -8175,6 +8217,7 @@ class MyStats:
         self.memstats=string_to_dict(options.get('stats'))
 
     #--------------------
+    @staticmethod
     def add_or_modify(**options):
         name=options.get('name')
         stats=options.get('stats')
@@ -8194,6 +8237,7 @@ class MyStats:
         return s
 
     #--------------------
+    @staticmethod
     def set_delta_origin_all_interfaces():
         for i in MyStats.stats_dict:
             MyStats.stats_dict[i].set_delta_origin()
@@ -8204,6 +8248,7 @@ class MyStats:
         self.delta_time=time.time()
 
     #--------------------
+    @staticmethod
     def set_selected_interfaces(**options):
         MyStats.if_list=options.get('if_list')
         MyStats.mgmt_nickname=options.get('nickname')
@@ -8230,7 +8275,7 @@ class MyStats:
         return delta
             
     #---------------------------------------------------------------
-
+    @staticmethod
     def clear():
         MyStats.stats_dict={}
         MyStats.if_list=[]
@@ -8260,10 +8305,12 @@ class MyDockerIf:
         MyDockerIf.dic[self.uid]=self
 
     #---------------------------------------------------------------
+    @staticmethod
     def clear_if_by_uid(uid):
         MyDockerIf.dic[uid]=None
 
     #--------------------
+    @staticmethod
     def clear():
 
         MyDockerIf.dic={}
@@ -10270,6 +10317,7 @@ if __name__ == "__main__":
         "pushButton_docker_remove_image" : [ui,action_docker_remove_image],
         "pushButton_docker_run" : [ui,lambda:action_docker_run_iterate(False)],
         "pushButton_docker_run_iterate" : [ui,lambda:action_docker_run_iterate(True)],
+        "pushButton_docker_start" : [ui,action_docker_start],
         "pushButton_docker_stop" : [ui,action_docker_stop],
         "pushButton_docker_stopremove" : [ui,action_docker_stopremove],
         "pushButton_dockerfile_add_line" : [ui,action_dockerfile_add_line],

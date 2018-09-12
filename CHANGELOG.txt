@@ -1,3 +1,8 @@
+1.0.7  Docker start  added
+       @staticmethod added
+       docker ip iteration corrected to replace .0 with . in ip
+       refresh port at end only when deleting multiple ports
+
 1.0.6  ovs-toolbox now only update fields that have been changed.
        Don't refresh vlan,if,etc.. when _HOST is selected
 

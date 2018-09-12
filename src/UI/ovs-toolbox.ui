@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1284</width>
-    <height>955</height>
+    <width>1298</width>
+    <height>1038</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -5475,6 +5475,11 @@
            </item>
            <item>
             <widget class="QComboBox" name="comboBox_MCAST_enable">
+             <item>
+              <property name="text">
+               <string/>
+              </property>
+             </item>
              <item>
               <property name="text">
                <string>true</string>
@@ -12168,7 +12173,7 @@ default, the identifier is the MAC address of the bridge.</string>
         <item>
          <widget class="QTabWidget" name="tabWidget_4">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="subtab" stdset="0">
            <bool>true</bool>
@@ -13324,6 +13329,26 @@ default, the identifier is the MAC address of the bridge.</string>
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_docker_start">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="toolTip">
+                     <string>Start container</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../project_ressource.qrc">
+                      <normaloff>:/images/play-circle.png</normaloff>:/images/play-circle.png</iconset>
+                    </property>
+                   </widget>
                   </item>
                   <item>
                    <widget class="QPushButton" name="pushButton_docker_stop">
@@ -16293,7 +16318,7 @@ default, the identifier is the MAC address of the bridge.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1284</width>
+     <width>1298</width>
      <height>28</height>
     </rect>
    </property>
