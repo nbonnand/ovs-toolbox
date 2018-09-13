@@ -1,3 +1,5 @@
+1.0.8 Minor corrections for KVM tab
+
 1.0.7  Docker start  added
        @staticmethod added
        docker ip iteration corrected to replace .0 with . in ip
