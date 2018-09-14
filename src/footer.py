@@ -6753,7 +6753,7 @@ def action_docker_create_if(iter_mode,n,interface_uid,ovs_name,pid):
         if(net.net_type=='ad'):
             ip=net.ip
             (ip,)=iterate_array(iter_mode,n,[ip],ip_mode=True)
-            ip=ip.replace('.0','.')
+            ip=pattern_ip_zeroprefix.sub(r'\.\1',ip)
             #set ip on inside veth
             nsline.append("ip addr add {} dev {}".format(ip, int_veth))
         else:
@@ -10701,6 +10701,7 @@ if __name__ == "__main__":
     pattern_dot_node=re.compile(r'^(node\s\[.+?)(\])')
     pattern_qos_param=re.compile(r'^(.*?)=(.*)$')
     pattern_of_stats=re.compile(r'(?:\scookie=0x0,)|(?:\sduration=.+?,)|(?:\sn_packets=.+?,)|(?:\sn_bytes=.+?,)')
+    pattern_ip_zeroprefix=re.compile(r'\.0(\d)')
 
     html_replace = {
         "<": "&lt;",
