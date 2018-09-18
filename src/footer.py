@@ -1214,7 +1214,8 @@ def exec_and_display(mycommand,**opts):
 
     if(not mycommand):
         return
-    
+
+    hide_command=opts.get('hide_command',False)
     hide_output=opts.get('hide_output',False)
     input_text=opts.get('input',None)
     force_output=opts.get('force_output',False)
@@ -1222,7 +1223,13 @@ def exec_and_display(mycommand,**opts):
     decode=opts.get('decode',True)
     force_mgmt_nickname=opts.get('force_mgmt_nickname',False)
     ssh_auto_keycheck=opts.get('ssh_auto_keycheck',False)
-    
+
+    if(output_ui.checkBox_hiddencommand.isChecked()):
+            hide_command=False
+    else:
+        if(hide_command):
+            hide_output=True
+        
     if(force_mgmt_nickname):
         nickname=force_mgmt_nickname
     else:
@@ -2071,7 +2078,7 @@ def action_plotnet_refresh():
     else:
         filter_list=[]
 
-    result=exec_and_display(['plotnetcfg'])
+    result=exec_and_display(['plotnetcfg'],hide_command=True)
     input_text=[]
 
     subgraph=False
@@ -2128,7 +2135,7 @@ def action_plotnet_refresh():
 
     input="\n".join(input_text)
     #print("\nINPUT=\n\n",input)
-    exec_and_display(['dot','-Tpng',"-o{}".format(filename)],force_mgmt_nickname='_dot_mgmt',input=input)
+    exec_and_display(['dot','-Tpng',"-o{}".format(filename)],force_mgmt_nickname='_dot_mgmt',input=input,hide_command=True)
 
     ui.plotnet_img.setText('image saved: {}'.format(filename))
     
@@ -2204,7 +2211,7 @@ def action_controller_refresh():
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
         clear_widgets('CONTROLLER')
-        result=exec_and_display(['ovs-vsctl','list','controller',switch])
+        result=exec_and_display(['ovs-vsctl','list','controller',switch],hide_command=True)
         process_fields('CONTROLLER',result)
         process_fields('CONTROLLER_STATS',result,keep_dic=True)
         process_fields('CONTROLLER_CONN',result,keep_dic=True)
@@ -2244,7 +2251,7 @@ def action_open_vswitch_stats_validate():
 def action_open_vswitch_refresh():
     if(debug):mydebug(inspect.currentframe())
 
-    result=exec_and_display(['ovs-vsctl','list','open_vswitch'])
+    result=exec_and_display(['ovs-vsctl','list','open_vswitch'],hide_command=True)
     clear_widgets('OPEN_VSWITCH')
     process_fields('OPEN_VSWITCH',result)
     process_fields('OPEN_VSWITCH_STATS',result,keep_dic=True)
@@ -2271,7 +2278,7 @@ def action_manager_refresh():
 
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
-        result=exec_and_display(['ovs-vsctl','list','manager',switch])
+        result=exec_and_display(['ovs-vsctl','list','manager',switch],hide_command=True)
         clear_widgets('MANAGER')
         process_fields('MANAGER',result)
         
@@ -2316,7 +2323,7 @@ def action_ssl_refresh():
 
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
-        result=exec_and_display(['ovs-vsctl','list','ssl'])
+        result=exec_and_display(['ovs-vsctl','list','ssl'],hide_command=True)
         clear_widgets('SSL')
         process_fields('SSL',result)
         
@@ -2350,7 +2357,7 @@ def action_bridge_refresh():
 
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
-        result=exec_and_display(['ovs-vsctl','list','bridge',switch])
+        result=exec_and_display(['ovs-vsctl','list','bridge',switch],hide_command=True)
         clear_widgets('BRIDGE')
         process_fields('BRIDGE',result)
 #---------------------------------------------------------------
@@ -3143,7 +3150,7 @@ def dump_flows(switch,**options):
     if(filter):
         command.append(filter)
 
-    result=exec_and_display(command)
+    result=exec_and_display(command,hide_command=True)
     return of_no_stats(of_nostats,result)
             
 
@@ -3595,7 +3602,7 @@ def action_qos_queue_refresh(output):
         if(output):
             result=exec_and_display(['ovs-vsctl','--columns=_uuid,dscp,other_config','list','queue'],force_output=True)
         else:
-            result=exec_and_display(['ovs-vsctl','--columns=_uuid,dscp,other_config','list','queue'])
+            result=exec_and_display(['ovs-vsctl','--columns=_uuid,dscp,other_config','list','queue'],hide_command=True)
             
         process_fields('QUEUE',result)
 
@@ -3645,7 +3652,7 @@ def action_qos_porttree_refresh(output):
         if(output):
             result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'],force_output=True)
         else:
-            result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'])
+            result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'],hide_command=True)
         process_fields('QOS',result)
 #---------------------------------------------------------------
 
@@ -3674,7 +3681,7 @@ def action_qos_qos_refresh(output):
         if(output):
             result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'],force_output=True)
         else:
-            result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'])
+            result=exec_and_display(['ovs-vsctl','--columns=_uuid,queues,type,other_config','list','qos'],hide_command=True)
         process_fields('QOS',result)
 
 #---------------------------------------------------------------
@@ -3850,7 +3857,7 @@ def action_port_MCAST_refresh():
         if(portname=='_HOST'):
             continue
 
-        result=exec_and_display(['ovs-vsctl','--column=other_config','list','port',portname])
+        result=exec_and_display(['ovs-vsctl','--column=other_config','list','port',portname],hide_command=True)
         process_fields('MCAST_PORT',result)
 
         #stop after first port
@@ -3900,7 +3907,7 @@ def action_MCAST_refresh():
     clear_widgets('MCAST')
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
-        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs])
+        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs],hide_command=True)
         process_fields('MCAST',result)
         action_MCAST_toggle()
 
@@ -3946,7 +3953,7 @@ def action_port_RSTP_refresh():
 
         
         if(pattern_portname.match(portname)):
-            result=exec_and_display(['ovs-vsctl','list','port',portname])
+            result=exec_and_display(['ovs-vsctl','list','port',portname],hide_command=True)
             process_fields('PORT-RSTP',result)
 
 
@@ -3958,7 +3965,7 @@ def action_RSTP_refresh():
     clear_widgets('RSTP')
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
-        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs])
+        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs],hide_command=True)
         process_fields('RSTP',result)
 
         action_RSTP_toggle()
@@ -4018,7 +4025,7 @@ def action_STP_refresh():
     clear_widgets('STP')
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
-        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs])
+        result=exec_and_display(['ovs-vsctl','list','Bridge',ovs],hide_command=True)
         process_fields('STP',result)
 
         action_STP_toggle()
@@ -4063,7 +4070,7 @@ def action_port_STP_refresh():
             continue
 
         if(pattern_portname.match(portname)):
-            result=exec_and_display(['ovs-vsctl','list','port',portname])
+            result=exec_and_display(['ovs-vsctl','list','port',portname],hide_command=True)
             process_fields('PORT-STP',result)
 
 #---------------------------------------------------------------
@@ -4135,13 +4142,13 @@ def action_netflow_list(**opts):
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
         clear_widgets('netflow')
-        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'netflow'])
+        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'netflow'],hide_command=True)
         if(pattern_word.match(result0)):
             if('output' in opts):
                 if(opts['output']==True):
                     result=exec_and_display(['ovs-vsctl','list','netflow',ovs],force_output=True)
                 else:
-                    result=exec_and_display(['ovs-vsctl','list','netflow',ovs])
+                    result=exec_and_display(['ovs-vsctl','list','netflow',ovs],hide_command=True)
                 
                 process_fields('netflow',result)
             
@@ -4155,13 +4162,13 @@ def action_IPFIX_list(**opts):
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
         clear_widgets('IPFIX')
-        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'ipfix'])
+        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'ipfix'],hide_command=True)
         if(pattern_word.match(result0)):
             if('output' in opts):
                 if(opts['output']==True):
                     result=exec_and_display(['ovs-vsctl','list','ipfix',ovs],force_output=True)
                 else:
-                    result=exec_and_display(['ovs-vsctl','list','ipfix',ovs])
+                    result=exec_and_display(['ovs-vsctl','list','ipfix',ovs],hide_command=True)
 
                 process_fields('IPFIX',result)
 
@@ -4240,13 +4247,13 @@ def action_sflow_list(**opts):
     ovs=ui.lineEdit_ovs_name.text()
     if(ovs):
         clear_widgets('sflow')
-        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'sflow'])
+        result0=exec_and_display(['ovs-vsctl','get','Bridge',ovs,'sflow'],hide_command=True)
         if(pattern_word.match(result0)):
             if('output' in opts):
                 if(opts['output']==True):
                     result=exec_and_display(['ovs-vsctl','list','sflow',ovs],force_output=True)
                 else:
-                    result=exec_and_display(['ovs-vsctl','list','sflow',ovs])
+                    result=exec_and_display(['ovs-vsctl','list','sflow',ovs],hide_command=True)
 
                 process_fields('sflow',result)
 
@@ -4336,7 +4343,7 @@ def kvm_virt_disk_create(filename,fmt,size):
         mywarning(' Missing filename for disk !!! ')
         return False
 
-    result=exec_and_display(['ls','-d',filename])
+    result=exec_and_display(['ls','-d',filename],hide_command=True)
     for line in result.splitlines():
         mywarning('File disk already exists !')
         return False
@@ -4352,7 +4359,7 @@ def kvm_virt_disk_create(filename,fmt,size):
 
     exec_and_display(['qemu-img','create','-f',fmt,filename,size])
 
-    result=exec_and_display(['ls','-d',filename])
+    result=exec_and_display(['ls','-d',filename],hide_command=True)
     for line in result.splitlines():
         mywarning(' Operation completed !')
         break
@@ -4604,7 +4611,7 @@ def action_selectssh():
 def action_findovs(lineedit_widget):
     if(debug):mydebug(inspect.currentframe())
 
-    result=exec_and_display(['ovs-vsctl','--column=name','list','br'])
+    result=exec_and_display(['ovs-vsctl','--column=name','list','br'],hide_command=True)
     items=[]
     #print ("result=",result)
     if(not result):
@@ -5192,7 +5199,7 @@ def action_port_list():
         pt_Dialog.setWindowTitle("Port: {}".format(portname))
 
         if(pattern_portname.match(portname)):
-            result=exec_and_display(['ovs-vsctl','list','port',portname])
+            result=exec_and_display(['ovs-vsctl','list','port',portname],hide_command=True)
             for line in result.splitlines():
                 if(firsttime):pt_Dialog.show()
                 firsttime=False
@@ -5251,7 +5258,7 @@ def uuid2port_gen():
 
     port_dict={}
     
-    result_ports=exec_and_display(['ovs-vsctl','--column=_uuid,name','list','port'])
+    result_ports=exec_and_display(['ovs-vsctl','--column=_uuid,name','list','port'],hide_command=True)
     for line in result_ports.splitlines():
         pf=pattern_field.match(line)
         if(pf):
@@ -5289,7 +5296,7 @@ def action_mirror_select():
     name=mirror_table.getcurrenttext(0)
     clear_widgets('MIRROR')
     
-    result=exec_and_display(['ovs-vsctl','--column=name,output_port,output_vlan,select_all,select_dst_port,select_src_port,select_vlan,snaplen','find','mirror',"name={}".format(name)])
+    result=exec_and_display(['ovs-vsctl','--column=name,output_port,output_vlan,select_all,select_dst_port,select_src_port,select_vlan,snaplen','find','mirror',"name={}".format(name)],hide_command=True)
     process_fields('MIRROR',result)
 
     if(ui.lineEdit_mirror_output_vlan.text()):
@@ -5382,11 +5389,11 @@ def action_mirror_refresh():
 
     switch=ui.lineEdit_ovs_name.text()
     if(switch):
-        result1=exec_and_display(['ovs-vsctl','get','Bridge',switch,'mirrors'])
+        result1=exec_and_display(['ovs-vsctl','get','Bridge',switch,'mirrors'],hide_command=True)
         bridge_mirror_list= pattern_space_comma.split(result1.lstrip('[').rstrip(']\n'))
         mirror_table.delete_all_rows()
 
-        result2=exec_and_display(['ovs-vsctl','--columns=_uuid,name','list','mirror'])
+        result2=exec_and_display(['ovs-vsctl','--columns=_uuid,name','list','mirror'],hide_command=True)
         for line in result2.splitlines():
             pf=pattern_field.match(line)
             if(pf):
@@ -5573,7 +5580,7 @@ def action_bond_add():
 def get_bond_list():
     if(debug):mydebug(inspect.currentframe())
 
-    result=exec_and_display(['ovs-appctl','bond/list'])
+    result=exec_and_display(['ovs-appctl','bond/list'],hide_command=True)
     bonds=[]
 
     for line in result.splitlines():
@@ -5595,7 +5602,7 @@ def action_bond_refresh():
     for portline in port_tree.get_selected():
         portname,interfacename=port_and_interface(portline)
         if(portname in bonds):
-            result=exec_and_display(['ovs-vsctl','--column=name,bond_active_slave,bond_downdelay,bond_fake_iface,bond_mode,bond_updelay,lacp,other_config','list','port',portname])
+            result=exec_and_display(['ovs-vsctl','--column=name,bond_active_slave,bond_downdelay,bond_fake_iface,bond_mode,bond_updelay,lacp,other_config','list','port',portname],hide_command=True)
             process_fields('BOND',result)
             
         #stop after first port
@@ -5654,7 +5661,7 @@ def action_vlan_refresh():
 
         
         #result=exec_and_display(['ovs-vsctl','list','port',portname])
-        result=exec_and_display(['ovs-vsctl','list','port',portname])
+        result=exec_and_display(['ovs-vsctl','list','port',portname],hide_command=True)
         process_fields('PORT',result)
 
         #stop after first port
@@ -5817,7 +5824,7 @@ def action_interface_list():
         if_Dialog.setWindowTitle("Interface: {}".format(interfacename))
 
         if(pattern_portname.match(portname)):
-            result=exec_and_display(['ovs-vsctl','list','interface',interfacename])
+            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_command=True)
             for line in result.splitlines():
                 if(firsttime):if_Dialog.show()
                 firsttime=False
@@ -5919,7 +5926,7 @@ def action_interface_statistics_refresh():
     else:
         delta_mode=0
     
-    result=exec_and_display(['ovs-vsctl','--column=name,statistics','find','interface'],hide_output=False)
+    result=exec_and_display(['ovs-vsctl','--column=name,statistics','find','interface'],hide_command=True)
     for line in result.splitlines():
         pf=pattern_field.match(line)
         if(pf):
@@ -5960,7 +5967,7 @@ def action_interface_stats_refresh(switch):
     ui.plainTextEdit_port_stats.clear()
     interface_list=get_selected_interfaces()
     ofproto=Mymgmt.get_current_profile_attr('force_of')
-    result=exec_and_display(['ovs-ofctl','-O',ofproto,'dump-ports-desc',switch],hide_output=False)
+    result=exec_and_display(['ovs-ofctl','-O',ofproto,'dump-ports-desc',switch],hide_command=True)
     display_flag=False
     for line in result.splitlines():
         pld=pattern_interface_desc.search(line)
@@ -5973,7 +5980,7 @@ def action_interface_stats_refresh(switch):
             plaintext_print(ui.plainTextEdit_port_stats,line)
 
     #display stats
-    result=exec_and_display(['ovs-ofctl','-O',ofproto,'dump-ports',switch],hide_output=False)
+    result=exec_and_display(['ovs-ofctl','-O',ofproto,'dump-ports',switch],hide_command=True)
     display_flag=False
     for line in result.splitlines():
         pld=pattern_interface_nodesc.search(line)
@@ -5999,7 +6006,7 @@ def action_interface_type_refresh():
             if(portname=='_HOST'):
                 continue
 
-            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False)
+            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False,hide_command=True)
             process_fields('INTERFACE_TYPE',result)
             break
             
@@ -6022,7 +6029,7 @@ def action_interface_refresh():
             
             #cannot use column because some fields do not exist in old OF version
             #result=exec_and_display(['ovs-vsctl','--column=admin_state,link_state,external_ids,mtu,mtu_request,error,link_speed,duplex,statistics','list','interface',interfacename],hide_output=False)
-            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False)
+            result=exec_and_display(['ovs-vsctl','list','interface',interfacename],hide_output=False,hide_command=True)
             process_fields('INTERFACE',result)
 
             #stop after first port            
@@ -6125,7 +6132,7 @@ def action_ingress_refresh():
         if(portname=='_HOST'):
             continue
 
-        result=exec_and_display(['ovs-vsctl','--column=ingress_policing_burst,ingress_policing_rate','find','interface',"name={}".format(interfacename)],hide_output=True)
+        result=exec_and_display(['ovs-vsctl','--column=ingress_policing_burst,ingress_policing_rate','find','interface',"name={}".format(interfacename)],hide_output=True,hide_command=True)
         process_fields('PORT_INGRESS',result)
         #stop after first port
         break
@@ -6809,7 +6816,7 @@ def action_docker_ps():
     if(docker_release=='<1.13'):
         result=exec_and_display(['docker','ps','-a',"--format=\'{{.ID}}%%{{.Image}}%%{{.Command}}%%{{.CreatedAt}}%%{{.Status}}%%{{.Ports}}%%{{.Names}}\'"])
     else:
-        result=exec_and_display(['docker','container','ls','-a',"--format=\'{{.ID}}%%{{.Image}}%%{{.Command}}%%{{.CreatedAt}}%%{{.Status}}%%{{.Ports}}%%{{.Names}}\'"])
+        result=exec_and_display(['docker','container','ls','-a',"--format=\'{{.ID}}%%{{.Image}}%%{{.Command}}%%{{.CreatedAt}}%%{{.Status}}%%{{.Ports}}%%{{.Names}}\'"],hide_command=True)
 
 
     for line in result.splitlines():
@@ -6956,7 +6963,7 @@ def action_docker_image_filter():
     if(docker_release=='<1.13'):
         result=exec_and_display(['docker','images','--format="{{.Repository}}%%{{.Tag}}%%{{.ID}}%%{{.CreatedAt}}%%{{.Size}}"'])
     else:
-        result=exec_and_display(['docker','image','ls','--format="{{.Repository}}%%{{.Tag}}%%{{.ID}}%%{{.CreatedAt}}%%{{.Size}}"'])
+        result=exec_and_display(['docker','image','ls','--format="{{.Repository}}%%{{.Tag}}%%{{.ID}}%%{{.CreatedAt}}%%{{.Size}}"'],hide_command=True)
 
     for line in result.splitlines():
         m=pattern_filter.search(line)
@@ -7299,7 +7306,7 @@ class myPort:
         
         if(switch):
 
-            result=exec_and_display(['ovs-vsctl','--column=_uuid,name,interfaces','list','port'],hide_output=True)
+            result=exec_and_display(['ovs-vsctl','--column=_uuid,name,interfaces','list','port'],hide_output=True,hide_command=True)
             for line in result.splitlines():
                 mpt_field=pattern_if_field.match(line)
                 if(mpt_field):
@@ -7361,7 +7368,7 @@ class myInterface:
         uuid=None
         
         if(switch):
-            result=exec_and_display(['ovs-vsctl','--column=_uuid,name','list','interface'],hide_output=True)
+            result=exec_and_display(['ovs-vsctl','--column=_uuid,name','list','interface'],hide_output=True,hide_command=True)
             for line in result.splitlines():
                 mif_field=pattern_if_field.match(line)
                 if(mif_field):

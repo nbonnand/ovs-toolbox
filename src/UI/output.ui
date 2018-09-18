@@ -297,6 +297,16 @@ Occurrences of pattern _SWITCHNAME_ will be replaced on the fly by selected prof
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_hiddencommand">
+        <property name="toolTip">
+         <string>Display commands</string>
+        </property>
+        <property name="text">
+         <string>hidden commands</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="checkBox_outputerror">
         <property name="toolTip">
          <string>Display errors</string>

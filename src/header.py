@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+#Copyright 2018 Nicolas Bonnand
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from PyQt5.QtWidgets import (QFileDialog,QInputDialog,QAbstractScrollArea,QAbstractItemView,QDockWidget,QCompleter,QItemDelegate,QHeaderView,QDesktopWidget,QTreeView,QSizePolicy,QTableView)

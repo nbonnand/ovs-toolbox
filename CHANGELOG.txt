@@ -1,3 +1,6 @@
+1.0.9 Adding hidden commands feature in output ui to enable or
+      disable display of too verbose and to frequent commands
+
 1.0.8 Minor corrections for KVM tab
       docker ip iteration corrected to replace .0\d with .\1 in ip
 
