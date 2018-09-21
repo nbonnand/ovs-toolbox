@@ -42,6 +42,6 @@ iproute related things you can do with this GUI:
 - ip address setting
 
 Plotnetcfg
-- live image of network diagram generated thanks to Plotnetcfg and Graphviz
+- live image of network diagram generated thanks to [Plotnetcfg](https://github.com/jbenc/plotnetcfg) and [Graphviz](https://www.graphviz.org/)
 
 For documentation, read [ovs-toolbox wiki](https://github.com/nbonnand/ovs-toolbox/wiki)
