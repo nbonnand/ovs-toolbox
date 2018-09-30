@@ -45,3 +45,7 @@ Plotnetcfg
 - live image of network diagram generated thanks to [Plotnetcfg](https://github.com/jbenc/plotnetcfg) and [Graphviz](https://www.graphviz.org/)
 
 For documentation, read [ovs-toolbox wiki](https://github.com/nbonnand/ovs-toolbox/wiki)
+
+---
+
+&copy; 2018 Nicolas Bonnand, Licensed under the Apache License, Version 2.0
